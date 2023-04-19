@@ -1,0 +1,19 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<?import javafx.scene.control.*?>
+<?import javafx.scene.layout.*?>
+
+<VBox prefHeight="400.0" prefWidth="400.0" xmlns="http://javafx.com/javafx/16" xmlns:fx="http://javafx.com/fxml/1" fx:controller="com.example.Controller.FriendChatController">
+        <TextArea fx:id="chatTextArea" editable="false" wrapText="true">
+            <!-- 聊天消息显示区域数据绑定 -->
+        </TextArea>
+        <HBox>
+            <TextField fx:id="messageTextField" HBox.hgrow="ALWAYS">
+                <!-- 消息输入框数据绑定 -->
+            </TextField>
+            <Button text="发送" onAction="#sendMessage" defaultButton="true">
+                <!-- 发送按钮事件绑定 -->
+            </Button>
+        </HBox>
+</VBox>
+
