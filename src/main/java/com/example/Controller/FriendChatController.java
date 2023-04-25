@@ -48,6 +48,7 @@ public class FriendChatController {
         String message = messageTextField.getText().trim();
         if(message.equals("")){
             showAlert(Alert.AlertType.ERROR, "发送失败","不能发送空消息");
+            return;
         }
         //TODO:发送webSocket消息
         Client client=Client.getClient();
