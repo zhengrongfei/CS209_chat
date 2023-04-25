@@ -41,7 +41,7 @@ public class HelloApplication extends Application {
             // 连接数据库
             connector.connect();
             // 执行查询操作
-            User user=UserDao.getUserByUsername("zhengrogfei");
+            User user=UserDao.getUserByUsername("zhengrngfei");
             System.out.println(user.getPassword());
 
         } catch (SQLException e) {
