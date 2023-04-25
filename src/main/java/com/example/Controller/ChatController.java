@@ -22,6 +22,7 @@ import javafx.scene.layout.HBox;
 import javafx.scene.text.Font;
 import javafx.scene.text.Text;
 import javafx.stage.Stage;
+import javafx.stage.WindowEvent;
 
 
 import java.io.IOException;
@@ -31,6 +32,8 @@ import java.util.LinkedList;
 import java.util.Map;
 
 import static com.example.Controller.FriendChatController.friendChatController;
+import static com.example.Controller.GroupChatController.group;
+import static com.example.Controller.GroupChatController.groupChatController;
 import static java.lang.Thread.sleep;
 
 
@@ -38,6 +41,8 @@ public class ChatController {
 
     @FXML
     public ListView<String> friendsListView;
+
+
     public static ChatController chatController;
 
 
@@ -65,6 +70,55 @@ public class ChatController {
         });
     }
 
+    public void joinGroup(){
+        group.add(names.get(0));
+        Client client=Client.getClient();
+        client.joinGroup=true;
+        Platform.runLater(() -> {
+            try {
+                // 加载FXML文件
+                FXMLLoader fxmlLoader = new FXMLLoader(HelloApplication.class.getResource("groupChat.fxml"));
+                Parent root = fxmlLoader.load();
+                // 创建Scene和Stage
+                Scene scene = new Scene(root, 600, 400);
+                Stage groupStage = new Stage();
+                groupStage.setTitle("Group Chat");
+                groupStage.setScene(scene);
+                //通知群聊其他人
+                ChatMessage newMessage = new ChatMessage(client.user,"群发","加入聊天",null);
+                Gson gson1 = new Gson();
+                String newJsonMessage = gson1.toJson(newMessage);
+                client.send(newJsonMessage);
+                // 设置关闭事件处理器
+                groupStage.setOnCloseRequest(new EventHandler<WindowEvent>() {
+                    @Override
+                    public void handle(WindowEvent event) {
+                        // 在窗口关闭时执行的操作，例如关闭连接等
+                        // ...
+                        ChatMessage chatMessage = new ChatMessage(client.user, "群发", "退出聊天", null);
+                        Gson gson = new Gson();
+                        String jsonMessage = gson.toJson(chatMessage);
+                        client.send(jsonMessage);
+                    }
+                });
+
+                // 显示窗口
+                groupStage.show();
+
+            } catch (IOException e) {
+                e.printStackTrace();
+            }
+        });
+
+    }
+
+    public boolean getFriendStage(String friend){
+        if (friendStages.containsKey(friend)) {
+            return true;
+        }
+        return false;
+    }
+
 
 
     public Stage getOrCreateFriendStage(String friend) {
@@ -86,6 +140,19 @@ public class ChatController {
                 friendStage.setTitle(friend + "的聊天窗口");
                 friendStage.show();
                 friendStages.put(friend, friendStage);
+                friendStage.setOnCloseRequest(new EventHandler<WindowEvent>() {
+                    @Override
+                    public void handle(WindowEvent event) {
+                       //退出聊天时，给对方发送信息
+                        //client是我，friend是对方
+                        Client client=Client.getClient();
+                        ChatMessage chatMessage = new ChatMessage(client.user,friend,"我已退出聊天，请勿再给我发送信息",null);
+                        Gson gson = new Gson();
+                        String jsonMessage = gson.toJson(chatMessage);
+                        client.send(jsonMessage);
+                        friendStages.remove(friend);
+                    }
+                });
             });
             return null;
         }

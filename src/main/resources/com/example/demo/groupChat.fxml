@@ -1,0 +1,29 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<?import java.lang.*?>
+<?import java.util.*?>
+<?import javafx.scene.*?>
+<?import javafx.scene.control.*?>
+<?import javafx.scene.layout.*?>
+
+
+<BorderPane prefHeight="400.0" prefWidth="600.0" xmlns="http://javafx.com/javafx/16" xmlns:fx="http://javafx.com/fxml/1" fx:controller="com.example.Controller.GroupChatController">
+<center>
+<VBox>
+<TextArea fx:id="groupChatTextArea" editable="false" wrapText="true">
+    <!-- 聊天消息显示区域数据绑定 -->
+</TextArea>
+<HBox>
+    <TextField fx:id="groupMessageTextField" HBox.hgrow="ALWAYS">
+        <!-- 消息输入框数据绑定 -->
+    </TextField>
+    <Button text="发送" onAction="#sendMessage" defaultButton="true">
+        <!-- 发送按钮事件绑定 -->
+    </Button>
+</HBox>
+</VBox>
+</center>
+    <right>
+        <ListView fx:id="groupListView" layoutX="14.0" layoutY="14.0" prefHeight="372.0" prefWidth="150.0" />
+    </right>
+</BorderPane>

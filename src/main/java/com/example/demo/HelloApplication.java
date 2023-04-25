@@ -32,7 +32,7 @@ public class HelloApplication extends Application {
     public static void main(String[] args) {
         String url = "jdbc:mysql://rm-bp1f1g5s9130l993jwo.mysql.rds.aliyuncs.com:3306/chat";
         String username = "zhengrongfei";
-        String password = "Qa123456";
+        String password = "Qa12345678";
 
         // 创建MySQLConnector实例
         MySQLConnector connector = new MySQLConnector(url, username, password);

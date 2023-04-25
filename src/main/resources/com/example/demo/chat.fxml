@@ -7,6 +7,12 @@
 
 
 
-<AnchorPane prefHeight="400" prefWidth="600" xmlns="http://javafx.com/javafx/16" xmlns:fx="http://javafx.com/fxml/1" fx:controller="com.example.Controller.ChatController">
+<BorderPane prefHeight="372" prefWidth="150" xmlns="http://javafx.com/javafx/16" xmlns:fx="http://javafx.com/fxml/1" fx:controller="com.example.Controller.ChatController">
+<left>
 <ListView fx:id="friendsListView" layoutX="14.0" layoutY="14.0" prefHeight="372.0" prefWidth="150.0" />
-</AnchorPane>
+</left>
+    <right>
+    <Button fx:id="Group"  onAction="#joinGroup"  text="加入群聊" prefWidth="372" prefHeight="150" />
+    </right>
+
+</BorderPane>

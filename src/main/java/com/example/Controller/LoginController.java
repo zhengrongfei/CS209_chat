@@ -8,6 +8,7 @@ import com.example.entity.User;
 import com.google.gson.Gson;
 import javafx.application.Platform;
 import javafx.concurrent.Task;
+import javafx.event.EventHandler;
 import javafx.fxml.FXML;
 import javafx.fxml.FXMLLoader;
 import javafx.scene.Parent;
@@ -18,6 +19,7 @@ import javafx.scene.control.TextField;
 import javafx.scene.control.Alert;
 import javafx.scene.control.Alert.AlertType;
 import javafx.stage.Stage;
+import javafx.stage.WindowEvent;
 
 import java.io.BufferedReader;
 import java.io.IOException;
@@ -26,6 +28,7 @@ import java.net.URI;
 import java.net.URISyntaxException;
 
 import static com.example.Controller.ChatController.names;
+import static com.example.client.Client.client;
 
 public class LoginController {
     @FXML
@@ -52,7 +55,6 @@ public class LoginController {
                     protected Void call() throws Exception {
                         // 在这里执行与服务器连接相关的操作
                         Client.startClient(username);
-
                         return null;
                     }
                 };
@@ -68,10 +70,17 @@ public class LoginController {
                         chatStage.setTitle("Fei Chat");
                         chatStage.setScene(scene);
                         // 设置关闭事件处理器
-                        chatStage.setOnCloseRequest(event -> {
-                            // 在窗口关闭时执行的操作，例如关闭连接等
-                            // ...
-                        });
+                        chatStage.setOnCloseRequest(new EventHandler<WindowEvent>() {
+                                                        @Override
+                                                        public void handle(WindowEvent event) {
+                                                            ChatMessage chatMessage = new ChatMessage(client.user, "退出", "", null);
+                                                            Gson gson = new Gson();
+                                                            String jsonMessage = gson.toJson(chatMessage);
+                                                            client.send(jsonMessage);
+                                                            client.close();
+                                                        }
+                                                    });
+
                         // 显示窗口
                         chatStage.show();
 

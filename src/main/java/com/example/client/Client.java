@@ -6,11 +6,14 @@ import com.example.Dao.UserDao;
 import com.example.Json.ChatMessage;
 import com.example.demo.MySQLConnector;
 import com.example.entity.User;
+import javafx.scene.control.Alert;
+import javafx.scene.control.Alert.AlertType;
 import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
 import javafx.application.Platform;
 import javafx.collections.FXCollections;
 import javafx.collections.ObservableList;
+import javafx.scene.control.Alert;
 import javafx.scene.control.ListCell;
 import javafx.scene.control.ListView;
 import javafx.scene.control.TextArea;
@@ -31,16 +34,19 @@ import java.util.UUID;
 import java.util.stream.Collectors;
 
 import static com.example.Controller.ChatController.*;
+import static com.example.Controller.GroupChatController.group;
+import static com.example.Controller.GroupChatController.groupChatController;
 import static javafx.application.Application.launch;
 
 public class Client extends WebSocketClient  {
 
-    private static Client client;
+    public static Client client;
     public String user;
     public Client(URI serverUri,String user) {
         super(serverUri);
         this.user =user;
     }
+    public boolean joinGroup=false;
 
     @Override
     public void onOpen(ServerHandshake handshake) {
@@ -52,12 +58,18 @@ public class Client extends WebSocketClient  {
 
     @Override
     public void onClose(int code, String reason, boolean remote) {
+        System.out.println("left");
     }
 
 
 
     @Override
     public void onMessage(String message) {
+        if(message.equals("exit")){
+            Platform.runLater(() -> {
+                showAlert(Alert.AlertType.ERROR, "通知", "服务器已关闭，请勿再发消息！");
+            });
+        }
         System.out.println(message);
         // 解析收到的 JSON 格式的消息内容为消息对象
         GsonBuilder gsonBuilder = new GsonBuilder();
@@ -69,26 +81,64 @@ public class Client extends WebSocketClient  {
         String receiver = chatMessage.getReceiver();
         String content = chatMessage.getContent();
         System.out.println(sender);
+        if(sender.equals("更新群聊")){
+            Platform.runLater(() -> {
+                group.addAll(chatMessage.getOnlineUser().stream()
+                        .filter(e -> !group.contains(e))
+                        .collect(Collectors.toList()));
+            });
+            return;
+        }
+        if(sender.equals("退出群聊")){
+            Platform.runLater(() -> {
+                group.remove(content);
+            });
+            return;
+        }
+        if(receiver.equals("群发")){
+            if(joinGroup){
+                //在群聊窗口中显示消息
+                Platform.runLater(() -> {
+                    groupChatController.groupChatTextArea.appendText("["+sender+"]:"+   content.replace("\\n","\n")+"\n" );
+                });
+            }
+            return;
+        }
+        if(sender.equals("退出")) {
+            Platform.runLater(() -> {
+                // 将收到的消息添加到ObservableList中
+                names.remove(content);
+            });
+            return;
+        }
         if(sender.equals("更新")) {
             Platform.runLater(() -> {
                 // 将收到的消息添加到ObservableList中
                 names.addAll(chatMessage.getOnlineUser().stream()
                         .filter(e -> !names.contains(e))
                         .collect(Collectors.toList()));
-                for (String item : names) {
-                    System.out.println(item);
-                }
             });
         }
         else if(!content.equals("成功连接到服务器！")){
             Platform.runLater(() -> {
-                Stage friendStage =chatController.getOrCreateFriendStage(sender);
-                // 在好友聊天窗口中显示消息
-                TextArea friendChatTextArea = (TextArea) friendStage.getScene().lookup("#chatTextArea");
-                friendChatTextArea.appendText("["+sender+"]:"+   content.replace("\\n","\n")+"\n" );
-                friendStage.setTitle(sender+"发来一条新消息！");
-            });
+                if(chatController.getFriendStage(sender)) {
+                    Stage friendStage = chatController.getOrCreateFriendStage(sender);
+                    // 在好友聊天窗口中显示消息
+                    TextArea friendChatTextArea = (TextArea) friendStage.getScene().lookup("#chatTextArea");
+                    friendChatTextArea.appendText("[" + sender + "]:" + content.replace("\\n", "\n") + "\n");
+                    friendStage.setTitle(sender + "发来一条新消息！");
+                } });
+
         }
+
+    }
+
+    private void showAlert(AlertType alertType, String title, String content) {
+        Alert alert = new Alert(alertType);
+        alert.setTitle(title);
+        alert.setHeaderText(null);
+        alert.setContentText(content);
+        alert.showAndWait();
     }
 
     public static Client getClient() {
